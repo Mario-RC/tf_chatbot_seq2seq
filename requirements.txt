@@ -1,2 +1,2 @@
-tensorflow==0.10.0rc0
+tensorflow-gpu==1.0.0
 jieba

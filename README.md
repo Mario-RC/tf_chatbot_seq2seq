@@ -1,5 +1,5 @@
 # Tensorflow chatbot
-### (with seq2seq + attention + dict-compress + beam search + anti-LM + facebook messenger server)
+### (with seq2seq + attention + dict-compress + beam search)
 
 
 > ####[Update 2017-03-14]
@@ -7,6 +7,10 @@
 > 2. A pre-trained model with twitter corpus is added, just `./go_example` to chat! (or preview my [chat example](https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm/blob/master/example_chat.md))
 > 3. You could start from tracing this `go_example` script to know how things work!
 
+> ####[Update 2019-07-24]
+> 1. Upgrade to tensorflow v1.0.0, no backward compatible since tensorflow have changed so much.   
+> 2. A pre-trained model with twitter corpus is added, just `./go_example` to chat! (or preview my [chat example](https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm/blob/master/example_chat.md))
+> 3. You could start from tracing this `go_example` script to know how things work!
 
 ## Briefing
 This is a [seq2seq model][a1] modified from [tensorflow example][a2].
@@ -14,9 +18,6 @@ This is a [seq2seq model][a1] modified from [tensorflow example][a2].
 1. The original tensorflow seq2seq has [attention mechanism][a3] implemented out-of-box.
 2. And speedup training by [dictionary space compressing][a4], then decompressed by projection the embedding while decoding.
 3. This work add option to do [beam search][a5] in decoding procedure, which usually find better, more interesting response.
-4. Added [anti-language model][a6] to suppress the generic response problem of intrinsic seq2seq model.
-5. Imeplemented [this deep reinforcement learning architecture][a7] as an option to enhence semantic coherence and perplexity of response.
-6. A light weight [Flask][a8] server `app.py` is included to be the Facebook Messenger App backend.
 
 
 [a1]: http://arxiv.org/abs/1406.1078
@@ -30,19 +31,14 @@ This is a [seq2seq model][a1] modified from [tensorflow example][a2].
 [a9]: https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm/blob/master/README2.md
 
 
-## In Layman's terms
-
-I explained some detail about the features and some implementation tricks [here][a9].
-
-
 ## Just tell me how it works
 
 #### Clone the repository
 
-    git clone github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm.git
+    git clone github.com/Mario-RC/tf_chatbot_seq2seq_antilm.git
     
 #### Prepare for Corpus
-You may find corpus such as twitter chat, open movie subtitle, or ptt forums from [my chat corpus repository][b1]. You need to put it under path like:
+You may find corpus such as twitter chat, open movie subtitle, or ptt forums from [this chat corpus repository][b1]. You need to put it under path like:
 
     tf_chatbot_seq2seq_antilm/works/<YOUR_MODEL_NAME>/data/train/chat.txt
 
@@ -63,34 +59,6 @@ after you trained your model until perplexity under 50 or so, you could do:
 
 **[Note!!!] if you put any parameter overwrite in this main.py commmand, be sure to apply both to train and test, or just modify in lib/config.py for failsafe.**
 
-
-
-## Start your Facebook Messenger backend server
-
-    python3 app.py --model_name <MODEL_NAME>
-
-You may see this [minimum fb_messenger example][b2] for more details like setting up SSL, webhook, and work-arounds for known bug.
-
-Here's an interesting comparison: The left conversation enabled beam search with beam = 10, the response is barely better than always "i don't know". The right conversation also used beam search and additionally, enabled anti-language model. This supposed to suppress generic response, and the response do seems better.
-
-![messenger.png][h1]
-
-[h1]: https://raw.githubusercontent.com/Marsan-Ma/tf_chatbot_seq2seq_antilm/master/doc/messenger.png
-
-
-
-
-## Deep reinforcement learning
-
-> [Update 2017-03-09] Reinforcement learning does not work now, wait for fix.
-
-If you want some chance to further improve your model, here I implemented a reinforcement learning architecture inspired by [Li et al., 2016][b3]. Just enable the reinforce_learn option in `config.py`, you might want to add your own rule in `step_rf()` function in `lib/seq2seq_mode.py`. 
-
-Note that you should **train in normal mode to get a decent model first!**, since the reinforcement learning will explore the brave new world with this pre-trained model. It will end up taking forever to improve itself if you start with a bad model.
-
-[b1]: https://github.com/Marsan-Ma/chat_corpus
-[b2]: https://github.com/Marsan-Ma/fb_messenger
-[b3]: https://arxiv.org/abs/1606.01541
 
 ## Introduction
 
@@ -133,19 +101,12 @@ model_name | string | model name, affects your working path (storing the data, n
 scope_name | string | In tensorflow if you need to load two graph at the same time, you need to save/load them in different namespace. (If you need only one seq2seq model, leave it as default)
 vocab_size | integer | depends on your corpus language: for english, 60000 is good enough. For chinese you need at least 100000 or 200000.
 gpu_usage | float | tensorflow gpu memory fraction used, default is 1 and tensorflow will occupy 100% of your GPU. If you have multi jobs sharing your GPU resource, make it 0.5 or 0.3, for 2 or 3 jobs.
-reinforce_learn | int | set 1 to enable reinforcement learning mode
-
 
 **About decoding**
 
 name | type | default | Description
 ---- | ---- | ------- | -------
 beam_size | int | 10 | beam search size, setting 1 equals to greedy search 
-antilm | float | 0 (disabled) | punish weight of [anti-language model][d1] 
-n_bonus | float | 0 (disabled) | reward weight of sentence length 
-
-
-The anti-LM functin is disabled by default, you may start from setting antilm=0.5~0.7 and n_bonus=0.05 to see if you like the difference in results.
 
 [d1]: http://arxiv.org/pdf/1510.03055v3.pdf
 
@@ -182,9 +143,80 @@ Seq2seq is a model with many preliminaries, I've been spend quite some time surv
 
 
 ## TODOs
-1. Currently I build beam-search out of graph, which means --- it's very slow. There are discussions about build it in-graph [here][g1] and [there][g2]. But unfortunately if you want add something more than beam-search, like this anti-LM work, you need much more than just beam search to be in-graph.
-
-2. I haven't figure out how the MERT with BLEU can optimize weight of anti-LM model, since currently the BLEU is often being zero.
+1. Currently I build beam-search out of graph, which means --- it's very slow. There are discussions about build it in-graph [here][g1] and [there][g2]. But unfortunately if you want add something more than beam-search, you need much more than just beam search to be in-graph.
 
 [g1]: https://github.com/tensorflow/tensorflow/issues/654#issuecomment-196168030
 [g2]: https://github.com/tensorflow/tensorflow/pull/3756
+
+# A more detailed explaination about "the tensorflow chatbot"
+
+Here I'll try to explain some algorithm and implementation details about [this work][a1] in layman's terms.
+
+[a1]: https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm
+ 
+
+## Sequence to sequence model
+
+### What is a language model?
+
+Let's say a language model is ...   
+a) Trained by a lot of corpus.  
+b) It could predict the **probability of next word** given foregoing words.  
+=> It's just conditional probability, **P(next_word | foregoing_words)**  
+c) Since we could predict next word:   
+=> then predict even next, according to words just been generated  
+=> continuously, we could produce sentences, even paragraph.
+
+We could easily achieve this by simple [LSTM model][b1].
+
+
+### The seq2seq model architecture
+
+Again we quote this seq2seq architecture from [Google's blogpost]
+[![seq2seq][b2]][b3]
+
+It's composed of two language model: encoder and decoder. Both of them could be LSTM model we just mentioned.
+
+The encoder part accept input tokens and transform the whole input sentence into an embedding **"thought vector"**, which express the meaning of input sentence in our language model domain. 
+
+Then the decoder is just a language model, like we just said, a language model could generate new sentence according to foregoing corpus. Here we use this **"thought vector"** as kick-off and receive the corresponding mapping, and decode it into the response.
+
+
+### Reversed encoder input and Attention mechanism
+
+Now you might wonder:  
+a) Considering this architecture, wil the "thought vector" be dominated by later stages of encoder?  
+b) Is that enough to represent the meaning of whole input sentence into just a vector?  
+
+
+For (a) actually, one of the implement detail we didn't mention before: the input sentence will be reversed before input to the encoder. Thus we shorten the distance between head of input sentence and head of response sentence. Empirically, it achieves better results. (This trick is not shown in the architecture figure above, for easy to understanding)
+
+For (b), another methods to disclose more information to decoder is the [attention mechanism][b4]. The idea is simple: allowing each stage in decoder to peep any encoder stages, if they found useful in training phase. So decoder could understand the input sentence more and automagically peep suitable positions while generating response.
+
+
+
+[b1]: http://colah.github.io/posts/2015-08-Understanding-LSTMs
+[b2]: http://4.bp.blogspot.com/-aArS0l1pjHQ/Vjj71pKAaEI/AAAAAAAAAxE/Nvy1FSbD_Vs/s640/2TFstaticgraphic_alt-01.png
+[b3]: http://googleresearch.blogspot.ru/2015/11/computer-respond-to-this-email.html
+[b4]: http://arxiv.org/abs/1412.7449
+
+
+
+## Techniques about language model
+
+### Dictionary space compressing and projection
+
+A naive implementation of language model is: suppose we are training english language model, which a dictionary size of 80,000 is roughly enough. As we one-hot coding each word in our dictionary, our LSTM cell should have 80,000 outputs and we will do the softmax to choose for words with best probability...
+
+... even if you have lots of computing resource, you don't need to waste like that. Especially if you are dealing with some other languages with more words like Chinese, which 200,000 words is barely enough.
+
+Practically, we could reduce this 80,000 one-hot coding dictionary into embedding spaces, we could use like 64, 128 or 256 dimention to embed our 80,000 words dictionary, and train our model with only by this lower dimention. Then finally when we are generating the response, we project the embedding back into one-hot coding space for dictionary lookup.
+
+
+### Beam search
+
+The original implementation of tensorflow decode response sentence greedily. Empirically this trapped result in local optimum, and result in dump response which do have maximum probability in first couple of words. 
+
+So we do the beam search, keep best N candidates and move-forward, thus we could avoid local optimum and find more longer, interesting responses more closer to global optimum result.
+
+In [this paper][b4], Google Brain team found that beam search didn't benefit a lot in machine translation, I guess that's why they didn't implement beam search. But in my experience, chatbot do benefit a lot from beam search.
