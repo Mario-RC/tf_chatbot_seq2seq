@@ -163,5 +163,5 @@ def get_predicted_sentence(args, input_sentence, vocab, rev_vocab, model, sess, 
     for prob, _, cand in sorted(results, reverse=True):
       cand['dec_inp'] = " ".join([dict_lookup(rev_vocab, w) for w in cand['dec_inp']])
       res_cands.append(cand)
-    #SubSymbols(res_cands)
+    SubSymbols(res_cands)
     return res_cands[:args.beam_size]
