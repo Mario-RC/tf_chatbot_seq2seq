@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import sys, os
+import sys, os, re
 import numpy as np
 import tensorflow as tf
 from random import random
@@ -43,7 +43,7 @@ def create_model(session, args, forward_only=True):
 
 
 def dict_lookup(rev_vocab, out):
-    word = rev_vocab[out] if (out < len(rev_vocab)) else data_utils._UNK
+    word = rev_vocab[int(out)] if (out < len(rev_vocab)) else data_utils._UNK
     if isinstance(word, bytes):
       word = word.decode()
     return word
@@ -65,6 +65,14 @@ def cal_bleu(cands, ref, stopwords=['的', '嗎']):
         bleus.append(bleu)
         print(refs, cand, bleu)
     return np.average(bleus)
+
+
+def SubSymbols(resp_candidate):
+    resp,symbols = [],['_GO ',' _EOS',' _PAD','_GO','_EOS','_PAD']
+    for candidate in resp_candidate:
+        candidate['dec_inp'] = re.sub("|".join(symbols), '', candidate['dec_inp'])
+        resp.append(candidate)
+    return resp
 
 
 def get_predicted_sentence(args, input_sentence, vocab, rev_vocab, model, sess, debug=False, return_raw=False):
@@ -155,4 +163,5 @@ def get_predicted_sentence(args, input_sentence, vocab, rev_vocab, model, sess, 
     for prob, _, cand in sorted(results, reverse=True):
       cand['dec_inp'] = " ".join([dict_lookup(rev_vocab, w) for w in cand['dec_inp']])
       res_cands.append(cand)
+    #SubSymbols(res_cands)
     return res_cands[:args.beam_size]

@@ -1,4 +1,5 @@
 import os
+from shutil import copyfile
 
 import tensorflow as tf
 from datetime import datetime
@@ -13,8 +14,13 @@ def predict(args, debug=False):
             test_sentences = [s.strip() for s in test_fh.readlines()]
         return test_sentences
 
-    results_filename = '_'.join(['results', str(args.num_layers), str(args.size), str(args.vocab_size)])
+    results_filename = '_'.join(['results', str(args.num_layers), str(args.size), str(args.beam_size)])
     results_path = os.path.join(args.results_dir, results_filename+'.txt')
+    if os.path.isfile(results_path):
+        for i in range(1,10):
+            results_path = os.path.join(args.results_dir, results_filename+'({}).txt'.format(i))
+            if not os.path.isfile(results_path):
+                break
 
     with tf.Session() as sess, open(results_path, 'w') as results_fh:
         # Create model and load parameters.
@@ -34,8 +40,8 @@ def predict(args, debug=False):
                 print("%s : (%s)" % (sentence, datetime.now()))
                 results_fh.write("%s : (%s)\n" % (sentence, datetime.now()))
                 for sent in predicted_sentence:
-                    print("  (%s) -> %s" % (sent['prob'], sent['dec_inp']))
-                    results_fh.write("  (%f) -> %s\n" % (sent['prob'], sent['dec_inp']))
+                    print("  (%.4f) -> %s" % (sent['prob'], sent['dec_inp']))
+                    results_fh.write("  (%.4f) -> %s\n" % (sent['prob'], sent['dec_inp']))
             else:
                 print(sentence, ' -> ', predicted_sentence)
                 results_fh.write("%s -> %s\n" % (sentence, predicted_sentence))

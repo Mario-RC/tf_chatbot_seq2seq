@@ -26,7 +26,7 @@ def params_setup(cmdline=None):
   parser.add_argument('--steps_per_summary', type=int, default=25, help='How many training steps to do per tensorboard summary')
 
   # predicting params
-  parser.add_argument('--beam_size', type=int, default=1, help='beam search size')
+  parser.add_argument('--beam_size', type=int, default=2, help='beam search size')
 
   # environment params
   parser.add_argument('--gpu_usage', type=float, default=1.0, help='tensorflow gpu memory fraction used')
