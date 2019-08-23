@@ -110,18 +110,14 @@ def get_dialog_dev_set_path(path):
   return os.path.join(path, 'chat_test')
 
 
-def basic_tokenizer(sentence, en_jieba=False):
+def basic_tokenizer(sentence):
   """Very basic tokenizer: split the sentence into a list of tokens."""
-  if en_jieba:
-    tokens = list([w.lower() for w in jieba.cut(sentence) if w not in [' ']])
-    return tokens
-  else:
-    words = []
-    for space_separated_fragment in sentence.strip().split():
-      if isinstance(space_separated_fragment, str):
-        space_separated_fragment = space_separated_fragment.encode()
-      words.extend(_WORD_SPLIT.split(space_separated_fragment))
-    return [w.lower() for w in words if w]
+  words = []
+  for space_separated_fragment in sentence.strip().split():
+    if isinstance(space_separated_fragment, str):
+      space_separated_fragment = space_separated_fragment.encode()
+    words.extend(_WORD_SPLIT.split(space_separated_fragment))
+  return [w.lower() for w in words if w]
   
 
 
