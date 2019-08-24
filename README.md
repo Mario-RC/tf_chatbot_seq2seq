@@ -1,5 +1,5 @@
 # Tensorflow chatbot
-### (with seq2seq + attention + dict-compress + beam search)
+### Seq2Seq + Attention + Dict-Compress + Beam Search
 
 
 > ####[Update 2017-03-14]
