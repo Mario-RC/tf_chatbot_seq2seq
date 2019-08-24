@@ -31,6 +31,15 @@ def setup_workpath(workspace):
         n += 1
 
 
+def exitCallback(Step, maxStep, LR, minLR):
+  if (Step > maxStep and maxStep):
+    raise SystemExit
+    sys.exit(0)
+  if (LR < minLR and minLR):
+    raise SystemExit
+    sys.exit(0)
+
+
 def train(args):
 
     print("[%s] Preparing dialog data in %s" % (args.model_name, args.data_dir))
@@ -202,3 +211,6 @@ def train(args):
             summary_train_lr, val_lr = sess.run([lr_summary, add_lr], feed_dict={add_lr: model.learning_rate.eval()})
             writer.add_summary(summary_train_lr, current_step) # Record for tensorboard
             #writer.flush()
+            
+          exitCallback(model.global_step.eval(),args.max_train_steps,
+                       model.learning_rate.eval(),args.min_train_lr)

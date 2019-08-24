@@ -21,6 +21,9 @@ def params_setup(cmdline=None):
   parser.add_argument('--batch_size', type=int, default=4, help='Batch size to use during training.')
 
   parser.add_argument('--max_train_data_size', type=int, default=0, help='Limit on the size of training data (0: no limit)')
+  parser.add_argument('--max_train_steps', type=int, default=0, help='Maximun steps during trainning (0: no limit)')
+  parser.add_argument('--min_train_lr', type=int, default=0, help='Minimun learning rate (0: no limit)')
+  
   parser.add_argument('--steps_per_checkpoint', type=int, default=500, help='How many training steps to do per checkpoint (perplexity)')
   parser.add_argument('--steps_per_verbosity', type=int, default=100, help='How many training steps to do per verbosity print')
   parser.add_argument('--steps_per_summary', type=int, default=25, help='How many training steps to do per tensorboard summary')
