@@ -203,13 +203,13 @@ def train(args):
             add_bucket_three_loss: bucket_loss[2], add_bucket_three_ppx: bucket_ppx[2],
             add_bucket_four_loss: bucket_loss[3],  add_bucket_four_ppx: bucket_ppx[3]
             })
-            writer.add_summary(summary, current_step) # Record for tensorboard
+            writer.add_summary(summary, model.global_step.eval()) # Record for tensorboard
             #writer.flush()
           if (current_step % args.steps_per_summary == 0):
             summary_train_loss, val_loss = sess.run([step_loss_summary, add_step_loss], feed_dict={add_step_loss: step_loss})
-            writer.add_summary(summary_train_loss, current_step) # Record for tensorboard
+            writer.add_summary(summary_train_loss, model.global_step.eval()) # Record for tensorboard
             summary_train_lr, val_lr = sess.run([lr_summary, add_lr], feed_dict={add_lr: model.learning_rate.eval()})
-            writer.add_summary(summary_train_lr, current_step) # Record for tensorboard
+            writer.add_summary(summary_train_lr, model.global_step.eval()) # Record for tensorboard
             #writer.flush()
             
           exitCallback(model.global_step.eval(),args.max_train_steps,
